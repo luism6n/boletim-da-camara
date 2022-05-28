@@ -1,0 +1,6 @@
+config.json
+venv
+__pycache__
+atualizacoes/*
+!atualizacoes/.gitkeep
+credenciais-do-reddit.json
