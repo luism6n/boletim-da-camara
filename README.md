@@ -8,7 +8,7 @@ Clonar repositório e rodar:
 
 `pip install -r requirements`
 
-Copiar config.exemplo.js e mudar para os valores desejados. Para acessar a API do Reddit, você precisa criar um app em https://www.reddit.com/prefs/apps e obter uma chave e um segredo.
+Criar config.json. Pode copiar config.exemplo.json e mudar para os valores desejados. Para acessar a API do Reddit, você precisa criar um app em https://www.reddit.com/prefs/apps e obter uma chave e um segredo.
 
 Para ver os comandos disponíveis, rode:
 
