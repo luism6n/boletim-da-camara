@@ -1,0 +1,16 @@
+Apresentação de Proposição
+Despacho à Sanção
+Inclusão em Pauta
+Inclusão de Urgência em Pauta
+Discussão (Plenário)
+Votação
+Votação em 1º turno
+Votação em 2º turno
+Aprovação em 1º turno
+Leitura e publicação do Parecer
+Conclusão de CPI
+Remessa à Promulgação
+Remessa à Sanção
+Vetado Totalmente
+Votação (Plenário)
+Encaminhamento (Plenário)

@@ -1,0 +1,10 @@
+{
+    "subreddit": "MeuSubreddit",
+    "credenciaisDoReddit": {
+        "client_id": "YSbeacr7zrlKKg",
+        "client_secret": "8NSyy5rtGndZbXEY0Jr_FUbO5QE4Eg",
+        "user_agent": "Meu user agent",
+        "username": "Meu username",
+        "password": "Minha senha"
+    }
+}
