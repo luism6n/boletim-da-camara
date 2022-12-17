@@ -36,6 +36,8 @@
 import logging
 import os
 import praw
+import schedule
+import time
 
 RAIZ_DO_PROJETO = os.path.abspath(os.path.dirname(__file__))
 
@@ -121,11 +123,13 @@ import requests_cache
 
 LISTAR_HELP = """Lista atualizações de um dia ou intervalo de dias."""
 POSTAR_HELP = """Posta atualizações de um dia ou intervalo de dias."""
+CRON_HELP = """Rodar cron que posta atualizações."""
 DELETAR_HELP = (
     """Deleta as postagens das atualizações de um dia ou intervalo de dias."""
 )
 COMANDO_HELP = f"""Comando a ser executado.
 
+cron: {CRON_HELP}
 deletar: {DELETAR_HELP}
 postar: {POSTAR_HELP}
 listar: {LISTAR_HELP}"""
@@ -362,6 +366,7 @@ def buscar_atualizacoes_postadas_no_reddit(data_inicio, data_fim):
     )
     posts = []
     atualizacoes = []
+
     for i, post in enumerate(cliente_do_reddit.subreddit(SUBREDDIT).new(limit=None)):
         logger.debug(
             f"date={pendulum.from_timestamp(post.created_utc)}, data_fim={data_fim}, post {i}: {post.id}, link_to_reddit={post.shortlink}"
@@ -706,6 +711,11 @@ def postar_atualizacoes(atualizacoes):
     logger.info(f"postadas {count} atualizacoes")
 
 
+def postar_automatico():
+    hoje = pendulum.today()
+    postar_atualizacoes(buscar_atualizacoes(hoje, hoje))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -717,7 +727,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "comando", choices=["listar", "postar", "deletar"], help=COMANDO_HELP
+        "comando", choices=["listar", "postar", "deletar", "cron"], help=COMANDO_HELP
     )
 
     parser.add_argument("--dias", "-d", help=DIAS_HELP)
@@ -748,6 +758,13 @@ if __name__ == "__main__":
         }[args.log]
     )
     logger.debug(f"argumentos: {args}")
+
+    if args.comando == "cron":
+        schedule.every(1).hour.do(postar_automatico)
+
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
 
     dias = args.dias
     if dias:
