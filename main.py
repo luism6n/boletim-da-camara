@@ -145,12 +145,13 @@ FONTES_HELP = """Fontes de onde baixar os dados. Se nada for informado, baixa
 SOMENTE_FLAGGED_HELP = """Se informado, lista apenas atualizações que foram
             marcadas com flags."""
 
-requests_cache.install_cache(
-    "http_cache",
-    backend="sqlite",
-    expire_after=-1,
-    allowable_methods=("GET",),
-)
+if get_env("DEVELOPMENT", False):
+    requests_cache.install_cache(
+        "http_cache",
+        backend="sqlite",
+        expire_after=-1,
+        allowable_methods=("GET",),
+    )
 
 
 SUBREDDIT = get_env("SUBREDDIT")
