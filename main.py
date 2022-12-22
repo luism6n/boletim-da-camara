@@ -153,7 +153,6 @@ if get_env("DEVELOPMENT", False):
         allowable_methods=("GET",),
     )
 
-
 SUBREDDIT = get_env("SUBREDDIT")
 
 URL_DA_API = "https://dadosabertos.camara.leg.br/api/v2"
@@ -456,7 +455,12 @@ def buscar_tramitacoes(id, data_inicio, data_fim):
             },
         )
 
-        dados += resposta.json()["dados"]
+        try:
+            dados += resposta.json()["dados"]
+        except KeyError:
+            logger.error(f"erro ao buscar tramitações de {id}")
+            logger.error(resposta.json())
+            continue
 
     return dados
 
