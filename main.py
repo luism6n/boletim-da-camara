@@ -114,7 +114,7 @@ import argparse
 import logging
 import datetime
 import pendulum
-import collections
+import json
 import tabulate
 import re
 
@@ -426,7 +426,13 @@ def buscar_proposicoes_com_atualizacao(tipo, data_inicio, data_fim):
             "itens": 100,
             "siglaTipo": tipo,
         },
-    ).json()
+    )
+
+    try:
+        resposta = resposta.json()
+    except json.decoder.JSONDecodeError:
+        logger.error(f"resposta da API não é JSON: {resposta.text}")
+        return []
     proposicoes_com_atualizacao = resposta["dados"]
 
     numero_de_requisicoes = 2
@@ -459,7 +465,7 @@ def buscar_tramitacoes(id, data_inicio, data_fim):
             dados += resposta.json()["dados"]
         except KeyError:
             logger.error(f"erro ao buscar tramitações de {id}")
-            logger.error(resposta.json())
+            logger.error(resposta.text)
             continue
 
     return dados
@@ -467,10 +473,15 @@ def buscar_tramitacoes(id, data_inicio, data_fim):
 
 def buscar_autor_principal_e_seu_partido(id):
     logger.debug(f"baixando autores da proposição {id}")
-    autores = requests.get(
-        f"{URL_DA_API}/proposicoes/{id}/autores",
-        headers={"Content-Type": "application/json"},
-    ).json()["dados"]
+    try:
+        autores = requests.get(
+            f"{URL_DA_API}/proposicoes/{id}/autores",
+            headers={"Content-Type": "application/json"},
+        ).json()["dados"]
+    except Exception as e:
+        logger.error(f"erro ao buscar autores da proposição {id}")
+        logger.error(e)
+        return None, None
 
     # a primeira assinatura é o autor principal
     autores.sort(key=lambda x: x["ordemAssinatura"], reverse=True)
