@@ -776,7 +776,7 @@ if __name__ == "__main__":
     logger.debug(f"argumentos: {args}")
 
     if args.comando == "cron":
-        schedule.every(1).hour.do(postar_automatico)
+        schedule.every(4).hours.do(postar_automatico)
 
         while True:
             schedule.run_pending()
