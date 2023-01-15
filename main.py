@@ -48,6 +48,17 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
 
+def get_com_backoff(url, headers, params=None, backoff=0.5):
+    resposta = requests.get(url, headers=headers, params=params)
+    while resposta.status_code == 429:
+        logger.warning(f"rate limit atingido (429), esperando {backoff} segundos...")
+        time.sleep(backoff)
+        backoff *= 2
+        resposta = requests.get(url, headers=headers, params=params)
+
+    return resposta
+
+
 def caminho_absoluto(arquivo):
     """Retorna o caminho absoluto a partir da raiz do projeto"""
     return os.path.join(RAIZ_DO_PROJETO, arquivo)
@@ -66,7 +77,7 @@ def get_env(var, default=None):
 
 def baixar_autor_principal_e_seu_partido(id):
     logger.debug(f"baixando autores da proposição {id}")
-    autores = requests.get(
+    autores = get_com_backoff(
         f"{URL_DA_API}/proposicoes/{id}/autores",
         headers={"Content-Type": "application/json"},
     ).json()["dados"]
@@ -77,7 +88,7 @@ def baixar_autor_principal_e_seu_partido(id):
 
     if principal["tipo"] == "Deputado":
         logger.debug(f"baixando partido de {principal['nome']}")
-        resposta = requests.get(
+        resposta = get_com_backoff(
             principal["uri"],
             headers={"Content-Type": "application/json"},
         ).json()
@@ -417,7 +428,7 @@ def buscar_proposicoes_com_atualizacao(tipo, data_inicio, data_fim):
         return None
 
     logger.info("requisitando atualizações (1)")
-    resposta = requests.get(
+    resposta = get_com_backoff(
         f"{URL_DA_API}/proposicoes",
         headers={"Content-Type": "application/json"},
         params={
@@ -438,7 +449,7 @@ def buscar_proposicoes_com_atualizacao(tipo, data_inicio, data_fim):
     numero_de_requisicoes = 2
     while href := proxima_pagina(resposta):
         logger.info(f"requisitando atualizações ({numero_de_requisicoes})")
-        resposta = requests.get(
+        resposta = get_com_backoff(
             href,
             headers={"Content-Type": "application/json"},
         ).json()
@@ -452,7 +463,7 @@ def buscar_tramitacoes(id, data_inicio, data_fim):
     logger.debug(f"requisitando últimas tramitações de {id}")
     dados = []
     for dia in pendulum.period(data_inicio, data_fim).range("days"):
-        resposta = requests.get(
+        resposta = get_com_backoff(
             f"{URL_DA_API}/proposicoes/{id}/tramitacoes",
             headers={"Content-Type": "application/json"},
             params={
@@ -474,7 +485,7 @@ def buscar_tramitacoes(id, data_inicio, data_fim):
 def buscar_autor_principal_e_seu_partido(id):
     logger.debug(f"baixando autores da proposição {id}")
     try:
-        autores = requests.get(
+        autores = get_com_backoff(
             f"{URL_DA_API}/proposicoes/{id}/autores",
             headers={"Content-Type": "application/json"},
         ).json()["dados"]
@@ -489,7 +500,7 @@ def buscar_autor_principal_e_seu_partido(id):
 
     if principal["tipo"] == "Deputado":
         logger.debug(f"baixando partido de {principal['nome']}")
-        resposta = requests.get(
+        resposta = get_com_backoff(
             principal["uri"],
             headers={"Content-Type": "application/json"},
         ).json()
